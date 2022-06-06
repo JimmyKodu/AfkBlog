@@ -1,0 +1,14 @@
+﻿<div class="alert alert-secondary mt-4">
+    <span class="oi oi-pencil me-2" aria-hidden="true"></span>
+    <strong>@Title</strong>
+
+    <span class="text-nowrap">
+        请打开<a target="_blank" class="font-weight-bold link-dark" href="https://zhidao.baidu.com/question/1455052394559334380.html">百度知道</a>
+    </span>然后了解具体情况。
+</div>
+
+@code {
+    // Demonstrates how a parent component can supply parameters
+    [Parameter]
+    public string? Title { get; set; }
+}

@@ -1,0 +1,69 @@
+﻿@page "/closetoegg"
+@using System
+
+<PageTitle>爱哥贴贴</PageTitle>
+
+<h1>爱哥贴不贴</h1>
+
+<p role="status">尝试贴贴次数: @allCount</p>
+<p role="status">成功贴贴次数: @currentCount</p>
+@{
+    decimal rate = 0;
+    if (allCount != 0)
+    {
+        rate = (decimal)currentCount /(decimal)allCount * 100;
+        <p role="status">贴贴成功率: @rate%</p>
+    }
+    else
+
+    {
+        <p role="status">贴贴成功率: 0%</p>
+    }
+}
+
+
+<button class="btn btn-primary" @onclick="IncrementCount">点我贴贴</button>
+
+<h2>@result</h2>
+
+@code {
+
+    private int currentCount = 0;
+    private int allCount = 0;
+    private string result = "";
+    private int dt2;
+    private string imagePath=""; 
+    private void IncrementCount()
+    {
+        Random rd = new Random();
+
+
+
+        
+        dt2 = rd.Next();
+        allCount++;
+        Result();
+    }
+
+    
+    private void Result()
+    {
+        if(dt2%2==1)
+        {
+            imagePath = "Images/QQ图片20220527112933.gif";
+            result = "贴贴~";
+            currentCount++;
+        }
+        else
+        {
+            imagePath = "Images/QQ图片20220527112902.jpg";
+            result = "爱哥有人想和你贴贴了，我直接让他爬了";
+        }
+    }
+}
+@if (imagePath != "")
+{
+<p>
+<img src="@imagePath" alt="爱哥" />
+</p>
+} 
