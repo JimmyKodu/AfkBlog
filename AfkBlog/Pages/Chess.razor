@@ -24,7 +24,7 @@
             <h3>五子棋</h3>
             <div class="form-group">
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="exampleRadios"  @onclick="PcXianshou" checked>
+                    <input class="form-check-input" type="radio" name="exampleRadios" @onclick="PcXianshou" checked>
                     <label class="form-check-label" for="exampleRadios1">
                         电脑先手
                     </label>
@@ -68,7 +68,6 @@
      * 15x15格子
      * 1为黑子  2为白子  1始终先手
      */
-    private int score = 0;
     private string message = "";
     private int machineChesspiece = 1;
     private int myChesspiece = 2;
@@ -76,10 +75,7 @@
     private int playStatus = 0;
 
     private int[,] chess = new int[15, 15];
-    protected override async Task OnInitializedAsync()
-    {
-        
-    }
+    
 
     public void PcXianshou()
     {
@@ -99,14 +95,14 @@
         }
         if (playStatus != 1)
         {
-            jsRuntime.InvokeAsync<string>("alert", "请先点击 开始 按钮");
+            jsRuntime.InvokeAsync<string>("alert", "请先点击“开始”按钮！");
             return;
         }
         chess[row, cell] = myChesspiece;
         var isWin = IsWin(myChesspiece, row, cell);
         if (isWin)
         {
-            jsRuntime.InvokeAsync<string>("alert", "恭喜您，您赢了");
+            jsRuntime.InvokeAsync<string>("alert", "恭喜您，您赢了！");
             playStatus = 0;
             return;
         }
@@ -176,7 +172,7 @@
                 var isWin = IsWin(machineChesspiece, myPoint.Point.Row, myPoint.Point.Cell);
                 if (isWin)
                 {
-                    jsRuntime.InvokeAsync<string>("alert", "电脑赢了，您还需加油哦");
+                    jsRuntime.InvokeAsync<string>("alert", "电脑赢了，您还需加油哦！");
                     playStatus = 0;
                     return;
                 }
@@ -187,7 +183,7 @@
                 var isWin = IsWin(machineChesspiece, enemyPoint.Point.Row, enemyPoint.Point.Cell);
                 if (isWin)
                 {
-                    jsRuntime.InvokeAsync<string>("alert", "电脑赢了，您还需加油哦");
+                    jsRuntime.InvokeAsync<string>("alert", "电脑赢了，您还需加油哦！");
                     playStatus = 0;
                     return;
                 }
@@ -202,45 +198,37 @@
     {
         {
             //横方向
-            var i = 1;
-            var score = 1;
-            var rightValid = true;
-            var leftValid = true;
+            var i = 1;//向两边搜索次数
+            var score = 1;//搜到的连子
+            var rightValid = true;//是否还能往右搜索
+            var leftValid = true;//是否还能往左搜索
             while (i <= 5)
             {
-                var right = cell + i;
-                var left = cell - i;
-                if (rightValid && right < 15)
+                var right = cell + i;//往右
+                var left = cell - i;//往左
+                if (rightValid && right < 19)//如果还能往右且没超出边界
                 {
-                    if (chess[row, right] == chesspiece)
+                    if (chess[row, right] == chesspiece)//如果是连子
                     {
-                        score++;
-                        if (score >= 5)
-                        {
+                        score++;//加1
+                        if (score >= 5) //如果已经超过4个了，就判赢
                             return true;
-                        }
                     }
-                    else
+                    else //碰到空位或敌方棋子，中断搜索
                         rightValid = false;
                 }
-                if (leftValid && left >= 0)
+                if (leftValid && left >= 0) //如果还能往左且没超出边界
                 {
                     if (chess[row, left] == chesspiece)
                     {
-                        score++;
+                        score++; //加1
                         if (score >= 5)
-                        {
                             return true;
-                        }
-
                     }
-                    else
-                    {
+                    else //碰到空位或敌方棋子，中断搜索
                         leftValid = false;
-                    }
                 }
                 i++;
-
             }
         }
         {
@@ -386,6 +374,7 @@
     /// <returns></returns>
     private ValuedPoint GetValuedPoint(int chesspiece, int row, int cell)
     {
+        //TODO 电脑先4子不绝杀，反而堵玩家后4子
         var enemyChesspiece = chesspiece == 1 ? 2 : 1;
         var HScore = 0; 
         var VScore = 0;
