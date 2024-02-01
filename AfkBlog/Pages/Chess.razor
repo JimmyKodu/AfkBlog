@@ -4,10 +4,10 @@
 <div class="chessbox clearfix">
     <div class="chess">
         <div class="inner">
-            @for (var i = 0; i < 19; i++)
+            @for (var i = 0; i < 15; i++)
             {
                 <div class="clearfix">
-                    @for (var j = 0; j < 19; j++)
+                    @for (var j = 0; j < 15; j++)
                     {
                         var tempI = i;
                         var tempJ = j;
@@ -24,7 +24,7 @@
             <h3>五子棋</h3>
             <div class="form-group">
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="exampleRadios"  @onclick="PcXianshou" checked>
+                    <input class="form-check-input" type="radio" name="exampleRadios" @onclick="PcXianshou" checked>
                     <label class="form-check-label" for="exampleRadios1">
                         电脑先手
                     </label>
@@ -53,36 +53,29 @@
         </div>
     </div>
 </div>
-@for (var i = 0; i < 19; i++)
-            {
-                <div class="clearfix">
-                    @for (var j = 0; j < 19; j++)
-                    {
-                        var tempI = i;
-                        var tempJ = j;
-                        <div class="cell" @onclick="(() => Play(tempI,tempJ))">
-                            <span class="chess@(chess[i,j])"></span>
-                        </div>
-                    }
-                </div>
-            }
 @code {
+    public struct Point
+    {
+        public int Row { get; set; }
+        public int Cell { get; set; }
+    }
+    public class ValuedPoint
+    {
+        public Point Point { get; set; }
+        public int Score { get; set; }
+    }
     /*
-     * 19x19格子
+     * 15x15格子
      * 1为黑子  2为白子  1始终先手
      */
-    private int score = 0;
     private string message = "";
     private int machineChesspiece = 1;
     private int myChesspiece = 2;
     private int xianshou=1;
     private int playStatus = 0;
 
-    private int[,] chess = new int[19, 19];
-    protected override async Task OnInitializedAsync()
-    {
-        
-    }
+    private int[,] chess = new int[15, 15];
+    
 
     public void PcXianshou()
     {
@@ -102,14 +95,14 @@
         }
         if (playStatus != 1)
         {
-            jsRuntime.InvokeAsync<string>("alert", "请先点击 开始 按钮");
+            jsRuntime.InvokeAsync<string>("alert", "请先点击“开始”按钮！");
             return;
         }
         chess[row, cell] = myChesspiece;
         var isWin = IsWin(myChesspiece, row, cell);
         if (isWin)
         {
-            jsRuntime.InvokeAsync<string>("alert", "恭喜您，您赢了");
+            jsRuntime.InvokeAsync<string>("alert", "恭喜您，您赢了！");
             playStatus = 0;
             return;
         }
@@ -121,12 +114,12 @@
         if (playStatus == 0)
         {
             playStatus = 1;
-            chess = new int[19, 19];
+            chess = new int[15, 15];
             if (xianshou == 1)
             {
                 machineChesspiece = 1;
                 myChesspiece = 2;
-                chess[9, 9] = machineChesspiece;
+                chess[7, 7] = machineChesspiece;
                 message = "电脑:执黑子 \n我:执白子";
             }
             else
@@ -138,7 +131,7 @@
         }
         else {
             playStatus = 0;
-            chess = new int[19, 19];
+            chess = new int[15, 15];
         }
     }
 
@@ -146,13 +139,13 @@
     private void MachinePlay(int chesspiece)
     {
         //我方所有点的得分
-        var myPoints = new List<AfkBlog.Data.ValuedPoint>();
+        var myPoints = new List<ValuedPoint>();
         
         //敌方所有点的得分
-        var enemyPoints = new List<AfkBlog.Data.ValuedPoint>();
-        for (var i = 0; i < 19; i++)
+        var enemyPoints = new List<ValuedPoint>();
+        for (var i = 0; i < 15; i++)
         {
-            for (var j = 0; j < 19; j++)
+            for (var j = 0; j < 15; j++)
             {
                 if (chess[i, j] == 0)
                 {
@@ -179,7 +172,7 @@
                 var isWin = IsWin(machineChesspiece, myPoint.Point.Row, myPoint.Point.Cell);
                 if (isWin)
                 {
-                    jsRuntime.InvokeAsync<string>("alert", "电脑赢了，您还需加油哦");
+                    jsRuntime.InvokeAsync<string>("alert", "电脑赢了，您还需加油哦！");
                     playStatus = 0;
                     return;
                 }
@@ -190,7 +183,7 @@
                 var isWin = IsWin(machineChesspiece, enemyPoint.Point.Row, enemyPoint.Point.Cell);
                 if (isWin)
                 {
-                    jsRuntime.InvokeAsync<string>("alert", "电脑赢了，您还需加油哦");
+                    jsRuntime.InvokeAsync<string>("alert", "电脑赢了，您还需加油哦！");
                     playStatus = 0;
                     return;
                 }
@@ -205,45 +198,37 @@
     {
         {
             //横方向
-            var i = 1;
-            var score = 1;
-            var rightValid = true;
-            var leftValid = true;
+            var i = 1;//向两边搜索次数
+            var score = 1;//搜到的连子
+            var rightValid = true;//是否还能往右搜索
+            var leftValid = true;//是否还能往左搜索
             while (i <= 5)
             {
-                var right = cell + i;
-                var left = cell - i;
-                if (rightValid && right < 19)
+                var right = cell + i;//往右
+                var left = cell - i;//往左
+                if (rightValid && right < 15)//如果还能往右且没超出边界
                 {
-                    if (chess[row, right] == chesspiece)
+                    if (chess[row, right] == chesspiece)//如果是连子
                     {
-                        score++;
-                        if (score >= 5)
-                        {
+                        score++;//加1
+                        if (score >= 5) //如果已经超过4个了，就判赢
                             return true;
-                        }
                     }
-                    else
+                    else //碰到空位或敌方棋子，中断搜索
                         rightValid = false;
                 }
-                if (leftValid && left >= 0)
+                if (leftValid && left >= 0) //如果还能往左且没超出边界
                 {
                     if (chess[row, left] == chesspiece)
                     {
-                        score++;
+                        score++; //加1
                         if (score >= 5)
-                        {
                             return true;
-                        }
-
                     }
-                    else
-                    {
+                    else //碰到空位或敌方棋子，中断搜索
                         leftValid = false;
-                    }
                 }
                 i++;
-
             }
         }
         {
@@ -270,7 +255,7 @@
                 }
 
                 var bottom = row + i;
-                if (bottomValid && bottom < 19)
+                if (bottomValid && bottom < 15)
                 {
                     if (chess[bottom, cell] == chesspiece)
                     {
@@ -298,7 +283,7 @@
             {
                 var rightTopRow = row - i;
                 var rightTopCell = cell + i;
-                if (topValid && rightTopRow >= 0 && rightTopCell < 19)
+                if (topValid && rightTopRow >= 0 && rightTopCell < 15)
                 {
                     if (chess[rightTopRow, rightTopCell] == chesspiece)
                     {
@@ -314,7 +299,7 @@
 
                 var leftBottomRow = row + i;
                 var leftBottomCell = cell - i;
-                if (bottomValid && leftBottomRow < 19 && leftBottomCell >= 0)
+                if (bottomValid && leftBottomRow < 15 && leftBottomCell >= 0)
                 {
                     if (chess[leftBottomRow, leftBottomCell] == chesspiece)
                     {
@@ -358,7 +343,7 @@
 
                 var rightBottomRow = row + i;
                 var rightBottomCell = cell + i;
-                if (bottomValid && rightBottomRow < 19 && rightBottomCell < 19)
+                if (bottomValid && rightBottomRow < 15 && rightBottomCell < 15)
                 {
                     if (chess[rightBottomRow, rightBottomCell] == chesspiece)
                     {
@@ -387,8 +372,9 @@
     /// <param name="row"></param>
     /// <param name="cell"></param>
     /// <returns></returns>
-    private AfkBlog.Data.ValuedPoint GetValuedPoint(int chesspiece, int row, int cell)
+    private ValuedPoint GetValuedPoint(int chesspiece, int row, int cell)
     {
+        //TODO 电脑先4子不绝杀，反而堵玩家后4子
         var enemyChesspiece = chesspiece == 1 ? 2 : 1;
         var HScore = 0; 
         var VScore = 0;
@@ -408,7 +394,7 @@
             {
                 var right = cell + i;
                 var left = cell - i;
-                if (rightValid && right < 19)
+                if (rightValid && right < 15)
                 {
                     if (chess[row, right] == chesspiece)
                     {
@@ -562,7 +548,7 @@
                 }
 
                 var bottom = row + i;
-                if (bottomValid && bottom < 19)
+                if (bottomValid && bottom < 15)
                 {
                     if (chess[bottom, cell] == chesspiece)
                     {
@@ -671,7 +657,7 @@
             {
                 var rightTopRow = row - i;
                 var rightTopCell = cell + i;
-                if (topValid && rightTopRow >= 0 && rightTopCell < 19)
+                if (topValid && rightTopRow >= 0 && rightTopCell < 15)
                 {
                     if (chess[rightTopRow, rightTopCell] == chesspiece)
                     {
@@ -694,7 +680,7 @@
 
                 var leftBottomRow = row + i;
                 var leftBottomCell = cell - i;
-                if (bottomValid && leftBottomRow < 19 && leftBottomCell >= 0)
+                if (bottomValid && leftBottomRow < 15 && leftBottomCell >= 0)
                 {
                     if (chess[leftBottomRow, leftBottomCell] == chesspiece)
                     {
@@ -826,7 +812,7 @@
 
                 var rightBottomRow = row + i;
                 var rightBottomCell = cell + i;
-                if (bottomValid && rightBottomRow < 19 && rightBottomCell < 19)
+                if (bottomValid && rightBottomRow < 15 && rightBottomCell < 15)
                 {
                     if (chess[rightBottomRow, rightBottomCell] == chesspiece)
                     {
@@ -921,10 +907,10 @@
                 }
             }
         }
-        return new Data.ValuedPoint()
+        return new ValuedPoint()
         {
             Score = HScore + VScore + PScore + LScore,
-            Point = new Data.Point
+            Point = new Point
             {
                 Row = row,
                 Cell = cell

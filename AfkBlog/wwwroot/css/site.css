@@ -32,8 +32,8 @@ app {
 }
 .chess {
     background: #edc98f;
-    width: 546px;
-    height: 546px;
+    width: 424.6666666667px;
+    height: 424.6666666667px;
     border: #b18956 4px solid;
     overflow: hidden;
     float: left;
